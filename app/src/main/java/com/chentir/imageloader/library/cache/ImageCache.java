@@ -18,6 +18,8 @@ public interface ImageCache {
     @Nullable
     Bitmap fetch(String url);
 
+    void put(@NonNull  String url, @NonNull Bitmap bitmap);
+
     void clear();
 
     /**

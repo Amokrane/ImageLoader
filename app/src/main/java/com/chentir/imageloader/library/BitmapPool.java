@@ -22,7 +22,6 @@ public class BitmapPool {
                     liveCount++;
                     pool.put(bitmap);
                 } catch (InterruptedException e) {
-                    // FIXME: is this good?
                     // don't do anything
                 }
             }
@@ -35,7 +34,6 @@ public class BitmapPool {
             try {
                 return pool.take();
             } catch (InterruptedException e) {
-                // FIXME: is this good?
                 // don't do anything
             }
         }

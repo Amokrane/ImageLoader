@@ -32,13 +32,11 @@ class DownloadImageTask implements Callable<Void> {
         try {
             response = okHttpClient.newCall(request).execute();
 
-            // FIXME: response could be null
-            if (!response.isSuccessful()) {
+            if (response == null || !response.isSuccessful()) {
                 imageLoadingCallback.onError(imageLoadingRequest, new IOException());
             } else {
                 InputStream inputStream = response.body().byteStream();
                 BitmapFactory.Options options = new BitmapFactory.Options();
-
 
                 BitmapPool bitmapPool = ImageLoaderModule.getInstance().getBitmapPool();
 
@@ -59,10 +57,6 @@ class DownloadImageTask implements Callable<Void> {
             if (response != null) {
                 response.close();
             }
-
-            //if(bitmap != null) {
-            //    bitmap.recycle();
-            //}
         }
 
         return null;

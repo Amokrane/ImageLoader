@@ -34,6 +34,11 @@ class MemoryImageCache implements ImageCache {
     }
 
     @Override
+    public void put(@NonNull String url, @NonNull Bitmap bitmap) {
+        cache.put(url, bitmap);
+    }
+
+    @Override
     public void clear() {
         cache.evictAll();
     }

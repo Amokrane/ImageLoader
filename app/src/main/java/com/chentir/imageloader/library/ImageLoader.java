@@ -33,8 +33,6 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
 
     /**
      * An {@link ExecutorService} used for submitting {@link DownloadImageTask}s.
-     * FIXME: probably not the best executor implementation
-     * FIXME: when should we be shutting down the Executors?
      */
     private final ExecutorService workerExecutorService = Executors.newCachedThreadPool();
     private final Map<ImageView, Future> requestHistory = new ConcurrentHashMap<>();
@@ -203,7 +201,7 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
             imageStore.adjustCapacity(ImageCache.SystemResourceAvailability.LOW);
             // TODO: clear the BitmapPool
         } else if(i == TRIM_MEMORY_COMPLETE || i == TRIM_MEMORY_RUNNING_CRITICAL) {
-            imageStore.adjustCapacity(ImageCache.SystemResourceAvailability.CRITICAL);
+            imageStore.clearAll();
             // TODO: clear the BitmapPool
         }
     }

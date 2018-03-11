@@ -13,17 +13,14 @@ import net.jcip.annotations.ThreadSafe;
  */
 @ThreadSafe public class ImageStore {
 
-    @GuardedBy("this") private final DiskImageCache diskImageCache;
-
     @GuardedBy("this") private final MemoryImageCache memoryImageCache;
 
     public ImageStore() {
-        this(new DiskImageCache(), new MemoryImageCache());
+        this(new MemoryImageCache());
     }
 
     @VisibleForTesting
-    ImageStore(DiskImageCache diskImageCache, MemoryImageCache memoryImageCache) {
-        this.diskImageCache = diskImageCache;
+    ImageStore(MemoryImageCache memoryImageCache) {
         this.memoryImageCache = memoryImageCache;
     }
 
@@ -35,17 +32,12 @@ import net.jcip.annotations.ThreadSafe;
      */
     @Nullable
     public synchronized Bitmap fetchImage(@NonNull String url) {
-        // TODO: add pre-conditions
-        // TODO: add an AssertBackgroundThread
-        // FIXME: you cannot just read image from disk image on UI thread. Either do it correctly or remove disk caching entirely
-        return memoryImageCache.fetch(url) == null ? memoryImageCache.fetch(url) : diskImageCache.fetch(url);
+        return memoryImageCache.fetch(url);
     }
 
     @WorkerThread
     public synchronized void putImage(@NonNull String url, @NonNull Bitmap bitmap) {
-        // TODO: add an AssertBackgroundThread
-        // TODO: add pre-conditions
-        // TODO: define whether you want a write back or write through caching strategy
+        memoryImageCache.put(url, bitmap);
     }
 
     /**
@@ -53,11 +45,9 @@ import net.jcip.annotations.ThreadSafe;
      */
     public synchronized void clearAll() {
         memoryImageCache.clear();
-        diskImageCache.clear();
     }
 
     public synchronized void adjustCapacity(@NonNull ImageCache.SystemResourceAvailability systemResourceAvailability) {
         memoryImageCache.onAdjustCapacity(systemResourceAvailability);
-        diskImageCache.onAdjustCapacity(systemResourceAvailability);
     }
 }
