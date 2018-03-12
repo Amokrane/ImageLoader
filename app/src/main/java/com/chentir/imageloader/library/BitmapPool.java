@@ -9,13 +9,27 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class BitmapPool {
-    private static final int DEFAULT_POOL_CAPACITY= 20;
+    private static final int DEFAULT_POOL_CAPACITY = 10;
 
     private final BlockingQueue<Bitmap> pool = new ArrayBlockingQueue<>(DEFAULT_POOL_CAPACITY);
 
     private volatile int liveCount = 0;
 
-    public void add(@NonNull Bitmap bitmap) {
+    /**
+     * TODO:
+     * 1/ Check if the Bitmap can be re-used
+     * 2/ If it can't be re-used, call recycle on it
+     */
+    public void putBack(@NonNull Bitmap bitmap) {
+        Preconditions.checkNotNull(bitmap, "null Bitmaps cannot be put back to the BitmapPool");
+        Preconditions.ensure(!bitmap.isRecycled(), "Recycled Bitmaps cannot be put back to the BitmapPool");
+
+        // FIXME
+        //if (!bitmap.isMutable()) {
+        //    bitmap.recycle();
+        //    return;
+        //}
+
         synchronized (this) {
             if (pool.size() < DEFAULT_POOL_CAPACITY) {
                 try {
@@ -45,8 +59,7 @@ public class BitmapPool {
         return liveCount >= DEFAULT_POOL_CAPACITY;
     }
 
-    public boolean canUseForInBitmap(
-        Bitmap candidate, BitmapFactory.Options targetOptions) {
+    public boolean canUseForInBitmap(Bitmap candidate, BitmapFactory.Options targetOptions) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             // From Android 4.4 (KitKat) onward we can re-use if the byte size of

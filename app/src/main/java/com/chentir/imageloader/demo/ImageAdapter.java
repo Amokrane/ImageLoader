@@ -40,6 +40,7 @@ public class ImageAdapter extends RecyclerView.Adapter<ImageAdapter.ViewHolder> 
     public void onBindViewHolder(ViewHolder holder, int position) {
         ImageLoader.getInstance(context).load(holder.imageView, dataSet[position]);
         //Picasso.get().load(dataSet[position]).into(holder.imageView);
+        //Glide.with(context).load(dataSet[position]).into(holder.imageView);
     }
 
     @Override

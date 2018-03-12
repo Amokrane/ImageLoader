@@ -14,6 +14,12 @@ class Preconditions {
         return target;
     }
 
+    public static void ensure(boolean predicate, String errorMessage) {
+        if(!predicate) {
+            throw new IllegalStateException(errorMessage);
+        }
+    }
+
     public static void ensureMainThread() {
         if (!Thread.currentThread().equals(Looper.getMainLooper().getThread())) {
             throw new IllegalStateException("The current execution path was not running on the Main Thread");
