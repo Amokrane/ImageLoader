@@ -59,6 +59,19 @@ public class BitmapPool {
         return liveCount >= DEFAULT_POOL_CAPACITY;
     }
 
+    public void clear() {
+        synchronized (this) {
+            while(!pool.isEmpty()) {
+                Bitmap bitmap = pool.poll();
+                if(bitmap != null && !bitmap.isRecycled()) {
+                    bitmap.recycle();
+                }
+            }
+
+            pool.clear();
+        }
+    }
+
     public boolean canUseForInBitmap(Bitmap candidate, BitmapFactory.Options targetOptions) {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {

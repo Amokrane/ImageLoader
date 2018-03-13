@@ -96,6 +96,7 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
     public synchronized void cancelAllRequests() {
         cancelAllPendingRequests();
         cancelAllRetriedRequests();
+        ImageLoaderModule.getInstance().getBitmapPool().clear();
     }
 
     private synchronized void cancelAllPendingRequests() {
