@@ -30,10 +30,5 @@ dependencies {
     compile 'com.squareup.okhttp3:okhttp:3.9.0'
     compile group: 'com.github.stephenc.jcip', name: 'jcip-annotations', version: '1.0-1'
 
-    implementation 'com.github.bumptech.glide:glide:4.6.1'
-    annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
-
-    implementation 'com.squareup.picasso:picasso:2.71828'
-
     testCompile 'junit:junit:4.12'
 }
