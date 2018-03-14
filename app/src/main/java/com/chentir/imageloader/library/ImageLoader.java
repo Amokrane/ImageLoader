@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  * <li> In memory caching of already downloaded images </li>
  * <li> A pool of {@link Bitmap} objects to reduce memory footprint </li>
  * <li> System Memory awareness, by trimming cache memory usage when the system starts running low on memory </li>
- * <li> Automatic retries based when failing to download images </li>
+ * <li> Automatic retries when failing to download images </li>
  * </ul>
  *
  * <pre>
