@@ -14,7 +14,7 @@ import com.chentir.imageloader.library.retry.RetryStrategy;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -23,11 +23,30 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * The entry point for loading images.
+ *
+ * <p>
+ * This library provides the following features:
+ * <ul>
+ * <li> Asynchronous loading of images </li>
+ * <li> In memory caching of already downloaded images </li>
+ * <li> A pool of {@link Bitmap} objects to reduce memory footprint </li>
+ * <li> System Memory awareness, by trimming cache memory usage when the system starts running low on memory </li>
+ * <li> Automatic retries based when failing to download images </li>
+ * </ul>
+ *
  * <pre>
- * <code>
- * ImageLoader imageLoader = ImageLoader.getInstance(context).load(someImageView, "http://link_to_some_image_resource")
- * </code>
+ *   <code>
+ *   // load an image
+ *    ImageLoader imageLoader = ImageLoader.getInstance(context).load(someImageView,
+ * "http://link_to_some_image_resource");
+ *
+ *    // request cancellation
+ *    ImageLoader.getInstance(context).cancelRequest(someImageView);
+ *   </code>
  * </pre>
+ *
+ * </p>
  */
 public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
 
@@ -35,13 +54,23 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
      * An {@link ExecutorService} used for submitting {@link DownloadImageTask}s.
      */
     private final ExecutorService workerExecutorService = Executors.newCachedThreadPool();
-    private final Map<ImageView, Future> requestHistory = new ConcurrentHashMap<>();
 
+    /**
+     * Stores a history of all the pending requests. This is used for cancelling pending requests.
+     */
+    private final Map<ImageView, Future> requestHistory = new WeakHashMap<>();
+
+    /**
+     * An {@link ExecutorService} used for retrying {@link DownloadImageTask}s.
+     */
     private final ScheduledExecutorService retryWorkerExecutorService = Executors.newSingleThreadScheduledExecutor();
-    private final Map<ImageView, ScheduledFuture> retryRequestHistory = new ConcurrentHashMap<>();
+
+    /**
+     * Stores a history of all the pending retry requests. This is used for cancelling pending requests.
+     */
+    private final Map<ImageView, ScheduledFuture> retryRequestHistory = new WeakHashMap<>();
 
     private static volatile ImageLoader sInstance;
-
 
     public synchronized static ImageLoader getInstance(@NonNull Context context) {
         Preconditions.ensureMainThread();
@@ -163,7 +192,7 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
 
     @Override
     public void onError(@NonNull final ImageLoadingRequest imageLoadingRequest, @NonNull Throwable throwable) {
-        // only retry if the target ImageView is still weakly reachable
+        // When an error occurs, a retry is performed if the target ImageView is still weakly reachable
         if (imageLoadingRequest.getImageView() != null) {
             final RetryStrategy retryStrategy = ImageLoaderModule.getInstance().getRetryStrategy();
             final long nextTime = retryStrategy.calculateNextRetryTimeInMs(imageLoadingRequest);
@@ -195,15 +224,16 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
     @Override
     public void onTrimMemory(int i) {
         ImageStore imageStore = ImageLoaderModule.getInstance().getImageStore();
+        BitmapPool bitmapPool = ImageLoaderModule.getInstance().getBitmapPool();
 
         if (i == TRIM_MEMORY_BACKGROUND || i == TRIM_MEMORY_RUNNING_MODERATE) {
             imageStore.adjustCapacity(ImageCache.SystemResourceAvailability.MEDIUM);
-        } else if(i == TRIM_MEMORY_MODERATE || i == TRIM_MEMORY_RUNNING_LOW) {
+        } else if (i == TRIM_MEMORY_MODERATE || i == TRIM_MEMORY_RUNNING_LOW) {
             imageStore.adjustCapacity(ImageCache.SystemResourceAvailability.LOW);
-            // TODO: clear the BitmapPool
-        } else if(i == TRIM_MEMORY_COMPLETE || i == TRIM_MEMORY_RUNNING_CRITICAL) {
+            bitmapPool.clear();
+        } else if (i == TRIM_MEMORY_COMPLETE || i == TRIM_MEMORY_RUNNING_CRITICAL) {
             imageStore.clearAll();
-            // TODO: clear the BitmapPool
+            bitmapPool.clear();
         }
     }
 
@@ -212,11 +242,15 @@ public class ImageLoader implements ImageLoadingCallback, ComponentCallbacks2 {
         // no-op
     }
 
+    /**
+     * The system will be aggressively removing processes, so it's a good time to clear all caches
+     */
     @Override
     public void onLowMemory() {
         ImageStore imageStore = ImageLoaderModule.getInstance().getImageStore();
         imageStore.clearAll();
 
-        // TODO: clear the BitmapPool
+        BitmapPool bitmapPool = ImageLoaderModule.getInstance().getBitmapPool();
+        bitmapPool.clear();
     }
 }

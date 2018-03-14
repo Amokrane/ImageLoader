@@ -6,7 +6,10 @@ import com.chentir.imageloader.library.retry.ExponentialBackoff;
 import com.chentir.imageloader.library.retry.RetryStrategy;
 import okhttp3.OkHttpClient;
 
-public class ImageLoaderModule {
+/**
+ * A Singleton class that provides all the dependencies to the classes of the library
+ */
+class ImageLoaderModule {
 
     private static volatile ImageLoaderModule sInstance;
 
@@ -49,5 +52,7 @@ public class ImageLoaderModule {
     }
 
     @NonNull
-    public synchronized  BitmapPool getBitmapPool() { return bitmapPool; }
+    public synchronized BitmapPool getBitmapPool() {
+        return bitmapPool;
+    }
 }

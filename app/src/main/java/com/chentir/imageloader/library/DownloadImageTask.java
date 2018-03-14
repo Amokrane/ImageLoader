@@ -3,6 +3,7 @@ package com.chentir.imageloader.library;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import com.chentir.imageloader.library.cache.ImageStore;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,9 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
+/**
+ * The {@link Callable} task responsible for downloading remote images
+ */
 class DownloadImageTask implements Callable<Void> {
     private final ImageLoadingRequest imageLoadingRequest;
     private final ImageLoadingCallback imageLoadingCallback;
@@ -23,12 +27,22 @@ class DownloadImageTask implements Callable<Void> {
 
     @Override
     public Void call() throws Exception {
+        // Check the presence of the desired Bitmap in the cache first. Note that although, this check has been
+        // done prior to submitting this task, it is still necessary to do a double check here as the size of the
+        // thread pool is higher than 1, which means that there is a high chance of missing some cache entries while
+        // executing this task.
+        ImageStore imageStore = ImageLoaderModule.getInstance().getImageStore();
+        Bitmap bitmap = imageStore.fetchImage(imageLoadingRequest.getImageUrl());
+        if(bitmap != null) {
+            imageLoadingCallback.onSuccess(imageLoadingRequest, bitmap);
+            return null;
+        }
+
         Request request = new Request.Builder().url(imageLoadingRequest.getImageUrl()).build();
         ImageLoaderModule imageLoaderModule = ImageLoaderModule.getInstance();
         OkHttpClient okHttpClient = imageLoaderModule.getOkHttpClient();
 
         Response response = null;
-        Bitmap bitmap;
 
         try {
             response = okHttpClient.newCall(request).execute();
@@ -51,14 +65,11 @@ class DownloadImageTask implements Callable<Void> {
 
                 // First call to decodeStream, to set the width and height on the BitmapFactory.Options object
                 BitmapFactory.decodeStream(bufferedInputStream, null, options);
-
                 BitmapPool bitmapPool = ImageLoaderModule.getInstance().getBitmapPool();
+                bitmap = bitmapPool.take(options);
 
-                if (bitmapPool.hasBeenInitialized()) {
-                    bitmap = bitmapPool.take();
-                    if (bitmapPool.canUseForInBitmap(bitmap, options)) {
-                        options.inBitmap = bitmap;
-                    }
+                if (bitmap != null) {
+                    options.inBitmap = bitmap;
                 }
 
                 options.inJustDecodeBounds = false;
@@ -67,7 +78,6 @@ class DownloadImageTask implements Callable<Void> {
                 // Second call to decodeStream, used to create the actual Bitmap
                 bitmap = BitmapFactory.decodeStream(bufferedInputStream, null, options);
                 imageLoadingCallback.onSuccess(imageLoadingRequest, bitmap);
-                bitmapPool.putBack(bitmap);
             }
         } catch (IOException e) {
             imageLoadingCallback.onError(imageLoadingRequest, e);

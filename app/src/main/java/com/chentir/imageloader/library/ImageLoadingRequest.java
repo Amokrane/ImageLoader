@@ -9,6 +9,9 @@ import java.lang.ref.WeakReference;
  * A request consists in loading an image from a URL and into an {@link ImageView}
  */
 public class ImageLoadingRequest {
+    /**
+     * Keep a {@link WeakReference} on the ImageView to prevent memory leaks
+     */
     private final WeakReference<ImageView> imageViewWeakReference;
     private final String imageUrl;
     private final String key;

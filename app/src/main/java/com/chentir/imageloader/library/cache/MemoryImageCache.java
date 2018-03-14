@@ -5,7 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.util.LruCache;
 
-class MemoryImageCache implements ImageCache {
+public class MemoryImageCache implements ImageCache {
 
     /**
      * Represent the initial ratio of the VM heap budget used by the memory cache
@@ -45,7 +45,7 @@ class MemoryImageCache implements ImageCache {
 
     @Override
     public void onAdjustCapacity(@NonNull SystemResourceAvailability systemResourceAvailability) {
-        switch(systemResourceAvailability) {
+        switch (systemResourceAvailability) {
             case CRITICAL:
                 cache.resize((int) (VM_BUDGET_CRITICAL_RATIO * Runtime.getRuntime().maxMemory() * 1024 * 1024));
                 break;
