@@ -46,3 +46,6 @@ be fixed but calculated dynamically as a factor of memory availability on the de
 can no longer take Bitmaps, it would be interesting to evict the least recently used size-grouped Bitmaps.
    
 * **More testing**: The current code base does not have any unit tests. 
+
+## Note
+Don't use this production. Instead use a more battle-tested libraries like Glide (https://github.com/bumptech/glide), Picasso (https://github.com/square/picasso) or Fresco (https://github.com/facebook/fresco).
