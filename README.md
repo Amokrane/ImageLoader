@@ -5,7 +5,7 @@ ImageLoader is a library that simplifies the problem of loading remote images wi
 ## Features
 * Asynchronous loading of images
 * In memory caching of already downloaded images
-* A pool of {@link Bitmap} objects to reduce memory footprint
+* A pool of Bitmap objects to reduce memory footprint
 * System Memory awareness, by trimming cache memory usage when the system starts running low on memory
 * Automatic retries, with exponential backoff, when failing to download images
 
