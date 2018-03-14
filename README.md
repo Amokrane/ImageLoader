@@ -48,4 +48,4 @@ can no longer take Bitmaps, it would be interesting to evict the least recently 
 * **More testing**: The current code base does not have any unit tests. 
 
 ## Note
-Don't use this production. Instead use a more battle-tested libraries like Glide (https://github.com/bumptech/glide), Picasso (https://github.com/square/picasso) or Fresco (https://github.com/facebook/fresco).
+Don't use this in production. Instead use more battle-tested libraries like Glide (https://github.com/bumptech/glide), Picasso (https://github.com/square/picasso) or Fresco (https://github.com/facebook/fresco).
