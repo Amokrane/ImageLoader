@@ -21,7 +21,7 @@ public class MemoryImageCache implements ImageCache {
     private static final int INITIAL_CACHE_SIZE_IN_BYTES =
         (int) (VM_BUDGET_INITIAL_RATIO * Runtime.getRuntime().maxMemory());
 
-    private final LruCache<String, Bitmap> cache = new LruCache<String, Bitmap>(INITIAL_CACHE_SIZE_IN_MB) {
+    private final LruCache<String, Bitmap> cache = new LruCache<String, Bitmap>(INITIAL_CACHE_SIZE_IN_BYTES) {
         protected int sizeOf(String key, Bitmap value) {
             return value.getByteCount();
         }
