@@ -1,6 +1,6 @@
 # ImageLoader
 
-ImageLoader is a library that simplifies the problem of loading remote images within an Android application.
+ImageLoader is a library that simplifies the problem of loading remote images within an Android application. This code base is strictly for learning purposes. Great libraries exist to solve this problem, like Glide (https://github.com/bumptech/glide), Picasso (https://github.com/square/picasso) or Fresco (https://github.com/facebook/fresco).
     
 ## Features
 * Asynchronous loading of images
@@ -40,6 +40,8 @@ This library is far from being complete. This is a non-exhaustive list of improv
   
 * **Disk cache**: The only available cache strategy for now is in-memory caching. An additional layer of cache can be 
  offered when entries are evicted from the memory cache or if the entries are garbage collected.
+
+* **Better memory management** The current implementation assumes that Bitmap objects are allocated exclusively on the heap. However, this is only true for devices running Android versions from API level 11 (Android 3.0) to API level 25 (Android 7.1). Outside this range, the backing pixel data are allocated on native memory. The implication of that is the necessity of recycling bitmaps manually in the latter case. This documentation page explains this very well: (https://developer.android.com/topic/performance/graphics/manage-memory.html)
   
 * **A better Bitmap pool**: The current Bitmap pooling strategy can be improved. First, the capacity of the pool should not
 be fixed but calculated dynamically as a factor of memory availability on the device. Additionally, if the bitmap pool
