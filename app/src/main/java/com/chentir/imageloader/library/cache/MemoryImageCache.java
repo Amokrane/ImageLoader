@@ -18,8 +18,8 @@ public class MemoryImageCache implements ImageCache {
 
     private static final double VM_BUDGET_CRITICAL_RATIO = 0;
 
-    private static final int INITIAL_CACHE_SIZE_IN_MB =
-        (int) (VM_BUDGET_INITIAL_RATIO * Runtime.getRuntime().maxMemory() * 1024 * 1024);
+    private static final int INITIAL_CACHE_SIZE_IN_BYTES =
+        (int) (VM_BUDGET_INITIAL_RATIO * Runtime.getRuntime().maxMemory());
 
     private final LruCache<String, Bitmap> cache = new LruCache<String, Bitmap>(INITIAL_CACHE_SIZE_IN_MB) {
         protected int sizeOf(String key, Bitmap value) {
@@ -47,15 +47,15 @@ public class MemoryImageCache implements ImageCache {
     public void onAdjustCapacity(@NonNull SystemResourceAvailability systemResourceAvailability) {
         switch (systemResourceAvailability) {
             case CRITICAL:
-                cache.resize((int) (VM_BUDGET_CRITICAL_RATIO * Runtime.getRuntime().maxMemory() * 1024 * 1024));
+                cache.resize((int) (VM_BUDGET_CRITICAL_RATIO * Runtime.getRuntime().maxMemory()));
                 break;
 
             case MEDIUM:
-                cache.resize((int) (VM_BUDGET_MEDIUM_RATIO * Runtime.getRuntime().maxMemory() * 1024 * 1024));
+                cache.resize((int) (VM_BUDGET_MEDIUM_RATIO * Runtime.getRuntime().maxMemory()));
                 break;
 
             case LOW:
-                cache.resize((int) (VM_BUDGET_LOW_RATIO * Runtime.getRuntime().maxMemory() * 1024 * 1024));
+                cache.resize((int) (VM_BUDGET_LOW_RATIO * Runtime.getRuntime().maxMemory()));
                 break;
         }
     }
